@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Todo App</title>
+  </head>
+  <body>
+    <h1>Todo App</h1>
+    <div id="todo-list"></div>
+    <script>
+      async function updateTodoStatus(id, completed) {
+        const csrftoken = getCookie("csrftoken");
+        try {
+          const response = await fetch(`/unitApp/todos/${id}/`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": csrftoken,
+            },
+            body: JSON.stringify({ completed: completed }),
+          });
+          if (!response.ok) {
+            console.error("Failed to update todo:", response.status);
+          }
+        } catch (error) {
+          console.error("Error updating todo:", error);
+        }
+      }
+
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+              cookieValue = decodeURIComponent(
+                cookie.substring(name.length + 1)
+              );
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      async function fetchTodos() {
+        const response = await fetch("/unitApp/todos/");
+        const todos = await response.json();
+        const todoList = document.getElementById("todo-list");
+        todoList.innerHTML = todos
+          .map(
+            (todo) => `<p> (${todo.id})<input type="checkbox" ${
+              todo.completed ? "checked" : ""
+            } onchange="updateTodoStatus(${todo.id}, this.checked)">${
+              todo.title
+            } ${todo.description}  </p>
+          `
+          )
+          .join("");
+      }
+
+      fetchTodos();
+    </script>
+  </body>
+</html>
