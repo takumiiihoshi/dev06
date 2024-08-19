@@ -45,11 +45,11 @@
                               <div class="card">
                                   <div class="card-body">
                                       <div class="d-flex flex-row align-items-center gap-3">
-                                          <input type="text" class="form-control form-control-lg flex-grow-1" id="exampleFormControlInput1"
+                                          <input type="text" class="form-control form-control-lg flex-grow-1" id="inputTitle"
                                               placeholder="新タスク名を追加">
                                               <a href="#!" data-mdb-tooltip-init title="Set due date"><i
                                                 class="fas fa-calendar-alt fa-lg me-3"></i></a>
-                                          <button type="button" id="addButton" class="btn btn-primary btn-lg add-button">追加</button>
+                                                    <button type="submit" id="addButton" name="addTask" class="btn btn-primary btn-lg add-button" onclick="addTodo()">追加</button>
                                       </div>
                                     </div>
                                 </div>
@@ -100,6 +100,27 @@
                 }
             } catch (error) {
                 console.error("Error updating todo:", error);
+            }
+        }
+
+        async function addTodo() {
+            console.log("AAA")
+            const csrftoken = getCookie("csrftoken");
+            const title = document.querySelector('#inputTitle').value
+            try {
+                const response = await fetch(`/unitApp/todos/addTask/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrftoken,
+                    },
+                    body: JSON.stringify({ title: title }),
+                });
+                if (!response.ok) {
+                    console.error("Failed to add todo:", response.status);
+                }
+            } catch (error) {
+                console.error("Error add todo:", error);
             }
         }
 
