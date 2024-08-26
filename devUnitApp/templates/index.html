@@ -104,9 +104,9 @@
         }
 
         async function addTodo() {
-            console.log("AAA")
             const csrftoken = getCookie("csrftoken");
             const title = document.querySelector('#inputTitle').value
+            const description = ""
             try {
                 const response = await fetch(`/unitApp/todos/addTask/`, {
                     method: "POST",
@@ -122,6 +122,7 @@
             } catch (error) {
                 console.error("Error add todo:", error);
             }
+            fetchTodos()
         }
 
         function getCookie(name) {
