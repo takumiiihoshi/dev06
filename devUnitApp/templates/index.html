@@ -125,6 +125,29 @@
             fetchTodos()
         }
 
+        async function updateTodo(id) {
+            console.log('updateTodo')
+            const csrftoken = getCookie("csrftoken");
+            const title = document.querySelector('#inputTitle').value
+            const description = ""
+            try {
+                const response = await fetch(`/unitApp/todos/updateTask/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrftoken,
+                    },
+                    body: JSON.stringify({ id: id, title: title }),
+                });
+                if (!response.ok) {
+                    console.error("Failed to update todo:", response.status);
+                }
+            } catch (error) {
+                console.error("Error update todo:", error);
+            }
+            fetchTodos()
+        }
+
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== "") {
@@ -157,8 +180,8 @@
                     </li>
                     <li class="list-group-item ps-3 pe-0 py-1 rounded-0 border-0 bg-transparent">
                         <div class="d-flex flex-row justify-content-end mb-1">
-                            <a href="#!" class="text-info" data-mdb-tooltip-init title="Edit todo"><i class="fas fa-pencil-alt me-3"></i></a>
-                            <a href="#!" class="text-danger" data-mdb-tooltip-init title="Delete todo"><i class="fas fa-trash-alt"></i></a>
+                            <a class="text-info" data-mdb-tooltip-init title="Edit todo" onclick="updateTodo(${todo.id})"><i class="fas fa-pencil-alt me-3"></i></a>
+                            <a class="text-danger" data-mdb-tooltip-init title="Delete todo"><i class="fas fa-trash-alt"></i></a>
                         </div>
                         <div class="text-end text-muted">
                             <a href="#!" class="text-muted" data-mdb-tooltip-init title="Created date">

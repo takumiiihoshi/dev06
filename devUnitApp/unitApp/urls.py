@@ -11,5 +11,6 @@ router.register(r'todos', TodoViewSet)
 urlpatterns = [
     path('', views.index, name='index'),
     path('', include(router.urls)),
-    path('todos/addTask/', TodoViewSet.as_view({'post': 'add_task'}), name='add_task')
+    path('todos/addTask/', TodoViewSet.as_view({'post': 'add_task'}), name='add_task'),
+    path('todos/updateTask/', TodoViewSet.as_view({'post': 'update_task'}), name='update_task')
 ]
