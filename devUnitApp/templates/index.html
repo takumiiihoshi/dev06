@@ -78,12 +78,33 @@
         </div>
     </section>
 
+    <!-- Edit Task Modal -->
+    <div class="modal fade" id="editTaskModal" tabindex="-1" role="dialog" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editTaskModalLabel">Edit Task</h5>
+            <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="text" class="form-control" id="editTaskTitle">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onclick="saveEditedTask()">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Bootstrap JS and Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- MDB -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
     
     <script>
+        let currentEditingTaskId = null;
+
         async function updateTodoStatus(id, completed) {
             const csrftoken = getCookie("csrftoken");
             try {
@@ -125,11 +146,22 @@
             fetchTodos()
         }
 
-        async function updateTodo(id) {
-            console.log('updateTodo')
+        function openEditModal(id, currentTitle) {
+            currentEditingTaskId = id;
+            document.getElementById('editTaskTitle').value = currentTitle;
+            const editTaskModal = new mdb.Modal(document.getElementById('editTaskModal'));
+            editTaskModal.show();
+        }
+
+        async function saveEditedTask() {
+            const newTitle = document.getElementById('editTaskTitle').value;
+            await updateTodo(currentEditingTaskId, newTitle);
+            const editTaskModal = mdb.Modal.getInstance(document.getElementById('editTaskModal'));
+            editTaskModal.hide();
+        }
+
+        async function updateTodo(id, newTitle) {
             const csrftoken = getCookie("csrftoken");
-            const title = document.querySelector('#inputTitle').value
-            const description = ""
             try {
                 const response = await fetch(`/unitApp/todos/updateTask/`, {
                     method: "POST",
@@ -137,15 +169,16 @@
                         "Content-Type": "application/json",
                         "X-CSRFToken": csrftoken,
                     },
-                    body: JSON.stringify({ id: id, title: title }),
+                    body: JSON.stringify({ id: id, title: newTitle }),
                 });
                 if (!response.ok) {
                     console.error("Failed to update todo:", response.status);
+                } else {
+                    fetchTodos(); // 更新後にリストを再取得
                 }
             } catch (error) {
                 console.error("Error update todo:", error);
             }
-            fetchTodos()
         }
 
         function getCookie(name) {
@@ -180,7 +213,7 @@
                     </li>
                     <li class="list-group-item ps-3 pe-0 py-1 rounded-0 border-0 bg-transparent">
                         <div class="d-flex flex-row justify-content-end mb-1">
-                            <a class="text-info" data-mdb-tooltip-init title="Edit todo" onclick="updateTodo(${todo.id})"><i class="fas fa-pencil-alt me-3"></i></a>
+                            <a class="text-info" data-mdb-tooltip-init title="Edit todo" onclick="openEditModal(${todo.id}, '${todo.title.replace(/'/g, "\\'")}')"><i class="fas fa-pencil-alt me-3"></i></a>
                             <a class="text-danger" data-mdb-tooltip-init title="Delete todo"><i class="fas fa-trash-alt"></i></a>
                         </div>
                         <div class="text-end text-muted">
