@@ -19,9 +19,8 @@
           box-shadow: none;
       }
       #list1 .select-input.form-control[readonly]:not([disabled]) {
-          background-color: #fbfbfb;
+          background-color: #FBFBFB;
       }
-      
       .add-button {
           white-space: nowrap;
           min-width: fit-content;
@@ -33,14 +32,12 @@
         <div class="container py-5 h-100">
             <div class="row d-flex justify-content-center align-items-center h-100">
                 <div class="col">
-                    <div class="card" id="list1" style="border-radius: .75rem; background-color: #eff1f2;">
+                    <div class="card" id="list1" style="border-radius: .75rem; background-color: #EFF1F2;">
                         <div class="card-body py-4 px-4 px-md-5">
-
                             <p class="h1 text-center mt-3 mb-4 pb-3 text-primary">
                                 <i class="fas fa-check-square me-1"></i>
                                 <u>TodoApp</u>
                             </p>
-
                             <div class="pb-2">
                               <div class="card">
                                   <div class="card-body">
@@ -55,7 +52,6 @@
                                 </div>
                               </div>
                             </div>
-
                             <div class="d-flex justify-content-end align-items-center mb-4 pt-2 pb-3">
                                 <p class="small mb-0 me-2 text-muted">フィルター</p>
                                 <select data-mdb-select-init>
@@ -63,26 +59,22 @@
                                     <option value="2">完了</option>
                                     <option value="3">進行中</option>
                                 </select>
-                                <a href="#!" style="color: #23af89;" data-mdb-tooltip-init title="Ascending"><i
+                                <a href="#!" style="color: #23AF89;" data-mdb-tooltip-init title="Ascending"><i
                                         class="fas fa-sort-amount-down-alt ms-2"></i></a>
                             </div>
-
                             <div id="todo-list">
                                 <!-- Todo アイテムがここに動的に挿入されること -->
                             </div>
-
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-
     <!-- Bootstrap JS and Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- MDB -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
-    
     <script>
         async function updateTodoStatus(id, completed) {
             const csrftoken = getCookie("csrftoken");
@@ -102,7 +94,6 @@
                 console.error("Error updating todo:", error);
             }
         }
-
         async function addTodo() {
             const csrftoken = getCookie("csrftoken");
             const title = document.querySelector('#inputTitle').value
@@ -124,7 +115,25 @@
             }
             fetchTodos()
         }
-
+        async function deleteTask(id) {
+            const csrftoken = getCookie("csrftoken");
+            try {
+                const response = await fetch(`/unitApp/todos/deleteTask/`, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrftoken,
+                    },
+                    body: JSON.stringify({ id: id }),
+                });
+                if (!response.ok) {
+                    console.error("Failed to update todo:", response.status);
+                }
+            } catch (error) {
+                console.error("Error update todo:", error);
+            }
+            fetchTodos()
+        }
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== "") {
@@ -139,7 +148,6 @@
             }
             return cookieValue;
         }
-
         async function fetchTodos() {
             const response = await fetch("/unitApp/todos/");
             const todos = await response.json();
@@ -158,7 +166,7 @@
                     <li class="list-group-item ps-3 pe-0 py-1 rounded-0 border-0 bg-transparent">
                         <div class="d-flex flex-row justify-content-end mb-1">
                             <a href="#!" class="text-info" data-mdb-tooltip-init title="Edit todo"><i class="fas fa-pencil-alt me-3"></i></a>
-                            <a href="#!" class="text-danger" data-mdb-tooltip-init title="Delete todo"><i class="fas fa-trash-alt"></i></a>
+                            <a href="#!" class="text-danger" data-mdb-tooltip-init title="Delete todo" onclick="deleteTask(${todo.id})"><i class="fas fa-trash-alt"></i></a>
                         </div>
                         <div class="text-end text-muted">
                             <a href="#!" class="text-muted" data-mdb-tooltip-init title="Created date">
@@ -169,7 +177,6 @@
                 </ul>
             `).join('');
         }
-
         fetchTodos();
     </script>
 </body>
