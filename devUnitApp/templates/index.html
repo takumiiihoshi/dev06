@@ -164,24 +164,44 @@
             editTaskModal.hide();
         }
         
-        async function updateTodo(id, newTitle, newDescription) {
+        async function deleteTask(id) {
             const csrftoken = getCookie("csrftoken");
             try {
-                const response = await fetch(`/unitApp/todos/updateTask/`, {
+                const response = await fetch(`/unitApp/todos/deleteTask/`, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrftoken,
+                    },
+                    body: JSON.stringify({ id: id }),
+                });
+                if (!response.ok) {
+                    console.error("Failed to update todo:", response.status);
+                }
+            } catch (error) {
+                console.error("Error update todo:", error);
+            }
+            fetchTodos()
+        }
+
+        async function deleteTodo(id) {
+            const csrftoken = getCookie("csrftoken");
+            try {
+                const response = await fetch(`/unitApp/todos/deleteTask/`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         "X-CSRFToken": csrftoken,
                     },
-                    body: JSON.stringify({ id: id, title: newTitle, description: newDescription }),
+                    body: JSON.stringify({ id: id }),
                 });
                 if (!response.ok) {
-                    console.error("Failed to update todo:", response.status);
+                    console.error("Failed to delete todo:", response.status);
                 } else {
                     fetchTodos(); // 更新後にリストを再取得
                 }
             } catch (error) {
-                console.error("Error update todo:", error);
+                console.error("Error delete todo:", error);
             }
         }
 
@@ -199,6 +219,7 @@
             }
             return cookieValue;
         }
+
         async function fetchTodos() {
             const response = await fetch("/unitApp/todos/");
             const todos = await response.json();
@@ -220,7 +241,7 @@
                         <li class="list-group-item ps-3 pe-0 py-1 rounded-0 border-0 bg-transparent">
                             <div class="d-flex flex-row justify-content-end mb-1">
                                 <a class="text-info" data-mdb-tooltip-init title="Edit todo" onclick="openEditModal(${todo.id}, '${safeTitle}', '${safeDescription}')"><i class="fas fa-pencil-alt me-3 button"></i></a>
-                                <a class="text-danger" data-mdb-tooltip-init title="Delete todo"><i class="fas fa-trash-alt"></i></a>
+                                <a class="text-danger" data-mdb-tooltip-init title="Delete todo" onclick="deleteTask(${todo.id})"><i class="fas fa-trash-alt"></i></a>
                             </div>
                             <div class="text-end text-muted">
                                 <a href="#!" class="text-muted" data-mdb-tooltip-init title="Task description">
