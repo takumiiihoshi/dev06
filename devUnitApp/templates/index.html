@@ -205,6 +205,27 @@
             }
         }
 
+        async function updateTodo(id, newTitle, newDescription) {
+            const csrftoken = getCookie("csrftoken");
+            try {
+                const response = await fetch(`/unitApp/todos/updateTask/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrftoken,
+                    },
+                    body: JSON.stringify({ id: id, title: newTitle, description: newDescription }),
+                });
+                if (!response.ok) {
+                    console.error("Failed to update todo:", response.status);
+                } else {
+                    fetchTodos(); // 更新後にリストを再取得
+                }
+            } catch (error) {
+                console.error("Error update todo:", error);
+            }
+        }
+
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== "") {
