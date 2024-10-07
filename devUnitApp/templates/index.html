@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todo App</title>
+    <title>TodoApp</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -11,24 +11,35 @@
     <!-- MDB -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet">
     <style>
-      #list1 .form-control {
-          border-color: transparent;
-      }
-      #list1 .form-control:focus {
-          border-color: transparent;
-          box-shadow: none;
-      }
-      #list1 .select-input.form-control[readonly]:not([disabled]) {
-          background-color: #FBFBFB;
-      }
-      .add-button {
-          white-space: nowrap;
-          min-width: fit-content;
-      }
-      .fas {
-        cursor: pointer;
-      }
-  </style>
+        #list1 .form-control {
+            border-color: transparent;
+        }
+        #list1 .form-control:focus {
+            border-color: transparent;
+            box-shadow: none;
+        }
+        #list1 .select-input.form-control[readonly]:not([disabled]) {
+            background-color: #FBFBFB;
+        }
+        .add-button {
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+        .fas {
+          cursor: pointer;
+        }
+        .app-title {
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        .app-title:hover {
+            text-decoration: underline;
+        }
+        .task-description {
+            cursor: help;
+        }
+    </style>
 </head>
 <body>
     <section class="vh-100">
@@ -37,17 +48,20 @@
                 <div class="col">
                     <div class="card" id="list1" style="border-radius: .75rem; background-color: #EFF1F2;">
                         <div class="card-body py-4 px-4 px-md-5">
+                            <!-- タイトルにクリックイベントを追加 -->
                             <p class="h1 text-center mt-3 mb-4 pb-3 text-primary">
-                                <i class="fas fa-check-square me-1"></i>
-                                <u>TodoApp</u>
+                                <a href="#" class="app-title" onclick="reloadApp(); return false;">
+                                    <i class="fas fa-check-square me-1"></i>
+                                    <u>TodoApp</u>
+                                </a>
                             </p>
                             <div class="pb-2">
                               <div class="card">
                                   <div class="card-body">
                                       <div class="d-flex flex-row align-items-center gap-3">
                                           <input type="text" class="form-control form-control-lg flex-grow-1" id="inputTitle"
-                                              placeholder="新タスク名を追加">
-                                              <a href="#!" data-mdb-tooltip-init title="Set due date"><i
+                                              placeholder="新しいタスクを追加">
+                                              <a href="#!" data-mdb-tooltip-init title="期限を設定"><i
                                                 class="fas fa-calendar-alt fa-lg me-3"></i></a>
                                                     <button type="submit" id="addButton" name="addTask" class="btn btn-primary btn-lg add-button" onclick="addTodo()">追加</button>
                                       </div>
@@ -57,16 +71,16 @@
                             </div>
                             <div class="d-flex justify-content-end align-items-center mb-4 pt-2 pb-3">
                                 <p class="small mb-0 me-2 text-muted">フィルター</p>
-                                <select data-mdb-select-init>
-                                    <option value="1">すべて</option>
-                                    <option value="2">完了</option>
-                                    <option value="3">進行中</option>
+                                <select id="filterSelect" data-mdb-select-init>
+                                    <option value="all">すべて</option>
+                                    <option value="completed">完了</option>
+                                    <option value="active">進行中</option>
                                 </select>
-                                <a href="#!" style="color: #23AF89;" data-mdb-tooltip-init title="Ascending"><i
+                                <a href="#!" style="color: #23AF89;" data-mdb-tooltip-init title="昇順"><i
                                         class="fas fa-sort-amount-down-alt ms-2"></i></a>
                             </div>
                             <div id="todo-list">
-                                <!-- Todo アイテムがここに動的に挿入されること -->
+                                <!-- Todoアイテムがここに動的に挿入されること -->
                             </div>
                         </div>
                     </div>
@@ -75,27 +89,27 @@
         </div>
     </section>
 
-    <!-- Edit Task Modal -->
+    <!-- タスク編集モーダル -->
     <div class="modal fade" id="editTaskModal" tabindex="-1" role="dialog" aria-labelledby="editTaskModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="editTaskModalLabel">Edit Task</h5>
-              <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+              <h5 class="modal-title" id="editTaskModalLabel">タスクを編集</h5>
+              <button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="閉じる"></button>
             </div>
             <div class="modal-body">
               <div class="mb-3">
-                <label for="editTaskTitle" class="form-label">Title</label>
+                <label for="editTaskTitle" class="form-label">タイトル</label>
                 <input type="text" class="form-control" id="editTaskTitle">
               </div>
               <div class="mb-3">
-                <label for="editTaskDescription" class="form-label">Description</label>
+                <label for="editTaskDescription" class="form-label">説明</label>
                 <textarea class="form-control" id="editTaskDescription" rows="3"></textarea>
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary" onclick="saveEditedTask()">Save changes</button>
+              <button type="button" class="btn btn-secondary" data-mdb-dismiss="modal">閉じる</button>
+              <button type="button" class="btn btn-primary" onclick="saveEditedTask()">変更を保存</button>
             </div>
           </div>
         </div>
@@ -107,6 +121,17 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
     <script>
         let currentEditingTaskId = null;
+        let currentFilter = 'all';
+
+        document.getElementById('filterSelect').addEventListener('change', function() {
+            currentFilter = this.value;
+            fetchTodos();
+        });
+
+        // アプリをリロードする関数
+        function reloadApp() {
+            location.reload();
+        }
 
         async function updateTodoStatus(id, completed) {
             const csrftoken = getCookie("csrftoken");
@@ -120,12 +145,14 @@
                     body: JSON.stringify({ completed: completed }),
                 });
                 if (!response.ok) {
-                    console.error("Failed to update todo:", response.status);
+                    console.error("Todoの更新に失敗しました:", response.status);
                 }
+                fetchTodos();
             } catch (error) {
-                console.error("Error updating todo:", error);
+                console.error("Todoの更新中にエラーが発生しました:", error);
             }
         }
+
         async function addTodo() {
             const csrftoken = getCookie("csrftoken");
             const title = document.querySelector('#inputTitle').value
@@ -140,12 +167,12 @@
                     body: JSON.stringify({ title: title }),
                 });
                 if (!response.ok) {
-                    console.error("Failed to add todo:", response.status);
+                    console.error("Todoの追加に失敗しました:", response.status);
                 }
+                fetchTodos();
             } catch (error) {
-                console.error("Error add todo:", error);
+                console.error("Todoの追加中にエラーが発生しました:", error);
             }
-            fetchTodos()
         }
 
         function openEditModal(id, currentTitle, currentDescription) {
@@ -176,32 +203,11 @@
                     body: JSON.stringify({ id: id }),
                 });
                 if (!response.ok) {
-                    console.error("Failed to update todo:", response.status);
+                    console.error("Todoの削除に失敗しました:", response.status);
                 }
+                fetchTodos();
             } catch (error) {
-                console.error("Error update todo:", error);
-            }
-            fetchTodos()
-        }
-
-        async function deleteTodo(id) {
-            const csrftoken = getCookie("csrftoken");
-            try {
-                const response = await fetch(`/unitApp/todos/deleteTask/`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": csrftoken,
-                    },
-                    body: JSON.stringify({ id: id }),
-                });
-                if (!response.ok) {
-                    console.error("Failed to delete todo:", response.status);
-                } else {
-                    fetchTodos(); // 更新後にリストを再取得
-                }
-            } catch (error) {
-                console.error("Error delete todo:", error);
+                console.error("Todoの削除中にエラーが発生しました:", error);
             }
         }
 
@@ -217,12 +223,12 @@
                     body: JSON.stringify({ id: id, title: newTitle, description: newDescription }),
                 });
                 if (!response.ok) {
-                    console.error("Failed to update todo:", response.status);
+                    console.error("Todoの更新に失敗しました:", response.status);
                 } else {
-                    fetchTodos(); // 更新後にリストを再取得
+                    fetchTodos();
                 }
             } catch (error) {
-                console.error("Error update todo:", error);
+                console.error("Todoの更新中にエラーが発生しました:", error);
             }
         }
 
@@ -245,34 +251,43 @@
             const response = await fetch("/unitApp/todos/");
             const todos = await response.json();
             const todoList = document.getElementById("todo-list");
-            todoList.innerHTML = todos.map(todo => {
-                const safeTitle = (todo.title || '').replace(/'/g, "\\'");
-                const safeDescription = (todo.description || '').replace(/'/g, "\\'");
-                return `
-                    <ul class="list-group list-group-horizontal rounded-0 bg-transparent mb-2">
-                        <li class="list-group-item d-flex align-items-center ps-0 pe-3 py-1 rounded-0 border-0 bg-transparent">
-                            <div class="form-check">
-                                <input class="form-check-input me-0" type="checkbox" value="" id="todo-${todo.id}"
-                                    ${todo.completed ? "checked" : ""} onchange="updateTodoStatus(${todo.id}, this.checked)">
-                            </div>
-                        </li>
-                        <li class="list-group-item px-3 py-1 d-flex align-items-center flex-grow-1 border-0 bg-transparent">
-                            <p class="lead fw-normal mb-0">${safeTitle}</p>
-                        </li>
-                        <li class="list-group-item ps-3 pe-0 py-1 rounded-0 border-0 bg-transparent">
-                            <div class="d-flex flex-row justify-content-end mb-1">
-                                <a class="text-info" data-mdb-tooltip-init title="Edit todo" onclick="openEditModal(${todo.id}, '${safeTitle}', '${safeDescription}')"><i class="fas fa-pencil-alt me-3 button"></i></a>
-                                <a class="text-danger" data-mdb-tooltip-init title="Delete todo" onclick="deleteTask(${todo.id})"><i class="fas fa-trash-alt"></i></a>
-                            </div>
-                            <div class="text-end text-muted">
-                                <a href="#!" class="text-muted" data-mdb-tooltip-init title="Task description">
-                                    <p class="small mb-0"><i class="fas fa-info-circle me-2"></i>${safeDescription}</p>
-                                </a>
-                            </div>
-                        </li>
-                    </ul>
-                `;
-            }).join('');
+            todoList.innerHTML = todos
+                .filter(todo => {
+                    if (currentFilter === 'all') return true;
+                    if (currentFilter === 'completed') return todo.completed;
+                    if (currentFilter === 'active') return !todo.completed;
+                })
+                .map(todo => {
+                    const safeTitle = (todo.title || '').replace(/'/g, "\\'");
+                    const safeDescription = (todo.description || '').replace(/'/g, "\\'");
+                    return `
+                        <ul class="list-group list-group-horizontal rounded-0 bg-transparent mb-2">
+                            <li class="list-group-item d-flex align-items-center ps-0 pe-3 py-1 rounded-0 border-0 bg-transparent">
+                                <div class="form-check">
+                                    <input class="form-check-input me-0" type="checkbox" value="" id="todo-${todo.id}"
+                                        ${todo.completed ? "checked" : ""} onchange="updateTodoStatus(${todo.id}, this.checked)">
+                                </div>
+                            </li>
+                            <li class="list-group-item px-3 py-1 d-flex align-items-center flex-grow-1 border-0 bg-transparent">
+                                <p class="lead fw-normal mb-0">${safeTitle}</p>
+                            </li>
+                            <li class="list-group-item ps-3 pe-0 py-1 rounded-0 border-0 bg-transparent">
+                                <div class="d-flex flex-row justify-content-end mb-1">
+                                    <a class="text-info me-2" data-mdb-tooltip-init title="タスクを編集" onclick="openEditModal(${todo.id}, '${safeTitle}', '${safeDescription}')"><i class="fas fa-pencil-alt"></i></a>
+                                    <a class="text-danger me-2" data-mdb-tooltip-init title="タスクを削除" onclick="deleteTask(${todo.id})"><i class="fas fa-trash-alt"></i></a>
+                                    <a class="text-muted task-description" data-mdb-tooltip-init title="${safeDescription || '説明なし'}">
+                                        <i class="fas fa-info-circle"></i>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    `;
+                }).join('');
+            
+            // ツールチップを初期化
+            document.querySelectorAll('[data-mdb-tooltip-init]').forEach((tooltipTriggerEl) => {
+                new mdb.Tooltip(tooltipTriggerEl);
+            });
         }
         fetchTodos();
     </script>
