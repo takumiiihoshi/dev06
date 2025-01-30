@@ -11,6 +11,9 @@
     <!-- MDB -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" rel="stylesheet">
     <style>
+        li.drag-over {
+            border: 2px dashed #007bff;
+          }
         #list1 .form-control {
             border-color: transparent;
         }
@@ -250,8 +253,10 @@
         async function fetchTodos() {
             const response = await fetch("/unitApp/todos/");
             const todos = await response.json();
+            const sortedTodos = todos.sort((a, b) => a.order - b.order);
             const todoList = document.getElementById("todo-list");
-            todoList.innerHTML = todos
+             
+            todoList.innerHTML = sortedTodos
                 .filter(todo => {
                     if (currentFilter === 'all') return true;
                     if (currentFilter === 'completed') return todo.completed;
@@ -261,7 +266,8 @@
                     const safeTitle = (todo.title || '').replace(/'/g, "\\'");
                     const safeDescription = (todo.description || '').replace(/'/g, "\\'");
                     return `
-                        <ul class="list-group list-group-horizontal rounded-0 bg-transparent mb-2">
+                        <ul class="list-group list-group-horizontal rounded-0 bg-transparent mb-2" 
+                            draggable="true" data-id="${todo.id}">
                             <li class="list-group-item d-flex align-items-center ps-0 pe-3 py-1 rounded-0 border-0 bg-transparent">
                                 <div class="form-check">
                                     <input class="form-check-input me-0" type="checkbox" value="" id="todo-${todo.id}"
@@ -283,13 +289,72 @@
                         </ul>
                     `;
                 }).join('');
-            
+
+            attachDragAndDropListeners();
+                
             // ツールチップを初期化
             document.querySelectorAll('[data-mdb-tooltip-init]').forEach((tooltipTriggerEl) => {
                 new mdb.Tooltip(tooltipTriggerEl);
             });
         }
+
         fetchTodos();
+
+        function attachDragAndDropListeners() {
+            const items = document.querySelectorAll('#todo-list ul');
+            let draggedItem = null;
+        
+            items.forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    draggedItem = e.target;
+                    e.target.style.opacity = "0.5";
+                });
+        
+                item.addEventListener('dragend', (e) => {
+                    e.target.style.opacity = "";
+                });
+        
+                item.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+        
+                item.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (e.target.closest('ul') && e.target.closest('ul') !== draggedItem) {
+                        const target = e.target.closest('ul');
+                        const parent = target.parentNode;
+        
+                        if (Array.from(parent.children).indexOf(draggedItem) > Array.from(parent.children).indexOf(target)) {
+                            parent.insertBefore(draggedItem, target);
+                        } else {
+                            parent.insertBefore(draggedItem, target.nextSibling);
+                        }
+        
+                        updateOrder();
+                    }
+                });
+            });
+        }
+        
+        async function updateOrder() {
+            const reorderedIds = Array.from(document.querySelectorAll('#todo-list ul')).map(
+                (item) => item.dataset.id
+            );
+        
+            try {
+                await fetch("/unitApp/todos/updateOrder/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCookie("csrftoken"),
+                    },
+                    body: JSON.stringify({ order: reorderedIds }),
+                });
+            } catch {
+                console.log('error')
+            }
+        }
+
     </script>
 </body>
 </html>

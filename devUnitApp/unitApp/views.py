@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework import viewsets
 from .models import Todo
 from .serializers import TodoSerializer
+import json 
 # Create your views here.
 # ToDoアイテムのリストを取得
 def index(request):
@@ -30,11 +31,20 @@ class TodoViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['post'], url_path='updateTask')
     def update_task(self, request):
-        print('################')
-        print(request.data['id'])
         todo = Todo.objects.get(pk=request.data['id'])
         serializer = TodoSerializer(todo, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'], url_path='updateOrder')
+    def update_order(self, request):
+        if request.method == "POST":
+            print(request.data)
+            order = request.data.get("order")
+            print(order)
+            for index, todo_id in enumerate(order):
+                Todo.objects.filter(id=todo_id).update(order=index)
+            return Response(status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
