@@ -45,6 +45,14 @@
                                     <option value="completed">完了</option>
                                     <option value="active">進行中</option>
                                 </select>
+                                
+                                <p class="small mb-0 ms-3 me-2 text-muted">優先度</p>
+                                <select id="priorityFilterSelect" data-mdb-select-init>
+                                    <option value="all">すべて</option>
+                                    <option value="高">高</option>
+                                    <option value="中">中</option>
+                                    <option value="低">低</option>
+                                </select>
                             </div>
                             <div id="todo-list">
                                 <!-- Todoアイテムがここに動的に挿入される -->
@@ -131,6 +139,9 @@
             
             // Add event listener for filter changes
             document.getElementById('filterSelect').addEventListener('change', renderTodos);
+            
+            // Add event listener for priority filter changes
+            document.getElementById('priorityFilterSelect').addEventListener('change', renderTodos);
             
             // Add event listener for Enter key on input field
             document.getElementById('inputTitle').addEventListener('keypress', function(e) {
@@ -243,14 +254,24 @@
         function renderTodos() {
             const todoList = document.getElementById('todo-list');
             const filter = document.getElementById('filterSelect').value;
+            const priorityFilter = document.getElementById('priorityFilterSelect').value;
             
             todoList.innerHTML = '';
             
             const filteredTodos = todos.filter(todo => {
-                if (filter === 'all') return true;
-                if (filter === 'completed') return todo.completed;
-                if (filter === 'active') return !todo.completed;
-                return true;
+                // Status filter
+                const statusMatch = 
+                    filter === 'all' || 
+                    (filter === 'completed' && todo.completed) || 
+                    (filter === 'active' && !todo.completed);
+                
+                // Priority filter
+                const priorityMatch = 
+                    priorityFilter === 'all' || 
+                    todo.priority === priorityFilter;
+                
+                // Both filters must match
+                return statusMatch && priorityMatch;
             });
             
             if (filteredTodos.length === 0) {
