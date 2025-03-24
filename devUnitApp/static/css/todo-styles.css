@@ -1,0 +1,25 @@
+#list1 .form-control {
+    border-color: transparent;
+}
+#list1 .form-control:focus {
+    border-color: transparent;
+    box-shadow: none;
+}
+.add-button { 
+    white-space: nowrap; 
+    min-width: fit-content; 
+}
+.fas { 
+    cursor: pointer; 
+}
+.app-title {
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+}
+.app-title:hover { 
+    text-decoration: underline; 
+}
+.task-description { 
+    cursor: help; 
+}
