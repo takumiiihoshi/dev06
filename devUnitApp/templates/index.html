@@ -64,8 +64,7 @@
                                       <div class="d-flex flex-row align-items-center gap-3">
                                           <input type="text" class="form-control form-control-lg flex-grow-1" id="inputTitle"
                                               placeholder="新しいタスクを追加">
-                                              <a href="#!" data-mdb-tooltip-init title="期限を設定"><i
-                                                class="fas fa-calendar-alt fa-lg me-3"></i></a>
+                                              <a href="#!" data-mdb-tooltip-init title="期限を設定"></a>
                                                     <button type="submit" id="addButton" name="addTask" class="btn btn-primary btn-lg add-button" onclick="addTodo()">追加</button>
                                       </div>
                                     </div>
@@ -78,6 +77,14 @@
                                     <option value="all">すべて</option>
                                     <option value="completed">完了</option>
                                     <option value="active">進行中</option>
+                                </select>
+
+                                <p class="small mb-0 me-2 ms-3 text-muted">優先度</p>
+                                <select id="priorityFilterSelect" data-mdb-select-init>
+                                    <option value="all">すべて</option>
+                                    <option value="高">高</option>
+                                    <option value="中">中</option>
+                                    <option value="低">低</option>
                                 </select>
                                 <a href="#!" style="color: #23AF89;" data-mdb-tooltip-init title="昇順"><i
                                         class="fas fa-sort-amount-down-alt ms-2"></i></a>
@@ -157,10 +164,18 @@
         let currentEditingTaskId = null;
         let currentDeletingTaskId = null;
         let currentFilter = 'all';
+        let currentPriorityFilter = 'all';
+        let isAscending = true;
 
         // フィルター変更時にTodoリストを更新する
         document.getElementById('filterSelect').addEventListener('change', function() {
             currentFilter = this.value;
+            fetchTodos();
+        });
+
+        // 優先度フィルター変更時にTodoリストを更新する
+        document.getElementById('priorityFilterSelect').addEventListener('change', function() {
+            currentPriorityFilter = this.value;
             fetchTodos();
         });
 
@@ -173,7 +188,30 @@
                     deleteConfirmModal.hide();
                 }
             });
+            // ソート順の切り替えボタンのイベントリスナーを設定
+        document.querySelector('[data-mdb-tooltip-init][title="昇順"]').addEventListener('click', function(e) {
+            e.preventDefault();
+            isAscending = !isAscending;
+            
+            // ツールチップとアイコンを更新
+            if (isAscending) {
+                this.setAttribute('title', '昇順');
+                this.querySelector('i').className = 'fas fa-sort-amount-down-alt ms-2';
+            } else {
+                this.setAttribute('title', '降順');
+                this.querySelector('i').className = 'fas fa-sort-amount-up-alt ms-2';
+            }
+            
+            // ツールチップを更新
+            const tooltip = mdb.Tooltip.getInstance(this);
+            if (tooltip) {
+                tooltip.dispose();
+            }
+            new mdb.Tooltip(this);
+            
+            fetchTodos();
         });
+    });
 
         // アプリをリロードする関数
         function reloadApp() {
@@ -339,14 +377,20 @@
         async function fetchTodos() {
             const response = await fetch("/unitApp/todos/");
             const todos = await response.json();
-            const sortedTodos = todos.sort((a, b) => a.order - b.order);
+            const sortedTodos = isAscending 
+            ? todos.sort((a, b) => a.order - b.order)
+            : todos.sort((a, b) => b.order - a.order);
             const todoList = document.getElementById("todo-list");
              
             todoList.innerHTML = sortedTodos
                 .filter(todo => {
-                    if (currentFilter === 'all') return true;
-                    if (currentFilter === 'completed') return todo.completed;
-                    if (currentFilter === 'active') return !todo.completed;
+                    let statusMatch = true;
+                    if (currentFilter === 'completed') statusMatch = todo.completed;
+                    if (currentFilter === 'active') statusMatch = !todo.completed;
+
+                    let priorityMatch = true;
+                    if (currentPriorityFilter !== 'all') priorityMatch = todo.priority === currentPriorityFilter;
+                    return statusMatch && priorityMatch;
                 })
                 .map(todo => {
                     const safeTitle = (todo.title || '').replace(/'/g, "\\'");
