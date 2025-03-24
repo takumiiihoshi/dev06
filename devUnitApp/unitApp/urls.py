@@ -11,5 +11,6 @@ urlpatterns = [
     path('todos/addTask/', TodoViewSet.as_view({'post': 'add_task'}), name='add_task'),
     path('todos/deleteTask/', TodoViewSet.as_view({'post': 'delete_task'}), name='delete_task'),
     path('todos/updateTask/', TodoViewSet.as_view({'post': 'update_task'}), name='update_task'),
-    path('todos/updateOrder/', TodoViewSet.as_view({'post': 'update_order'}), name='update_order')
+    path('todos/updateOrder/', TodoViewSet.as_view({'post': 'update_order'}), name='update_order'),
+    path('todos/todoChart/', TodoViewSet.as_view({'get': 'todo_chart'}), name='todo_chart')
 ]
