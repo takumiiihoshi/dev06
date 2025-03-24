@@ -258,9 +258,18 @@
                 return;
             }
             
-            filteredTodos.forEach(todo => {
+            filteredTodos.forEach((todo, index) => {
                 const todoItem = document.createElement('div');
                 todoItem.className = 'card mb-2';
+                todoItem.draggable = true;
+                todoItem.dataset.id = todo.id;
+                todoItem.dataset.index = index;
+                
+                // Add drag event listeners
+                todoItem.addEventListener('dragstart', handleDragStart);
+                todoItem.addEventListener('dragover', handleDragOver);
+                todoItem.addEventListener('drop', handleDrop);
+                todoItem.addEventListener('dragend', handleDragEnd);
                 
                 // Format scheduled date if exists
                 let scheduleText = '';
@@ -304,6 +313,57 @@
                 `;
                 
                 todoList.appendChild(todoItem);
+            });
+        }
+        
+        // Drag and drop handlers
+        let dragSrcEl = null;
+        
+        function handleDragStart(e) {
+            this.style.opacity = '0.4';
+            dragSrcEl = this;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', this.dataset.id);
+        }
+        
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+        
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            if (dragSrcEl !== this) {
+                const srcId = parseInt(dragSrcEl.dataset.id);
+                const destId = parseInt(this.dataset.id);
+                const srcIndex = todos.findIndex(t => t.id === srcId);
+                const destIndex = todos.findIndex(t => t.id === destId);
+                
+                if (srcIndex !== -1 && destIndex !== -1) {
+                    // Remove the dragged item from its original position
+                    const [movedItem] = todos.splice(srcIndex, 1);
+                    // Insert the item at the new position
+                    todos.splice(destIndex, 0, movedItem);
+                    saveTodos();
+                    renderTodos();
+                }
+            }
+            
+            return false;
+        }
+        
+        function handleDragEnd(e) {
+            this.style.opacity = '1';
+            
+            const items = document.querySelectorAll('#todo-list .card');
+            items.forEach(function(item) {
+                item.style.opacity = '1';
             });
         }
         
