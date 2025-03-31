@@ -51,20 +51,14 @@ class TodoViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='todoChart')
     def todo_chart(self, request):
         todos = Todo.objects.all()
-
         completed_count = Todo.objects.filter(completed=True).count()
         not_completed_count = Todo.objects.filter(completed=False).count()
-
         fig = px.pie(
             names=['完了', '未完了'],
             values=[completed_count, not_completed_count],
-            color_discrete_sequence=['#4CAF50', '#FF9800']
         )
-
         fig_json = fig.to_json() 
         fig_json_obj = json.loads(fig_json)
-
-
         for trace in fig_json_obj['data']:
             trace['values'] = [completed_count, not_completed_count]
         return Response({'chart': fig_json_obj}, status=status.HTTP_200_OK)
