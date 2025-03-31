@@ -94,7 +94,7 @@
                             </div>
                         </div>
                     </div>
-                    <div id="chart-container"style="height:400px">TODO状況</div>
+                    <div id="chart-container"style="height:400px; margin-top:40px;">全体TODO状況</div>
                 </div>
             </div>
         </div>
@@ -243,8 +243,10 @@
         // 新しいTodoを追加する関数
         async function addTodo() {
             const csrftoken = getCookie("csrftoken");
-            const title = document.querySelector('#inputTitle').value
-            const description = ""
+            const titleInput = document.querySelector('#inputTitle');
+            const title = titleInput.value;
+            const description = "";
+        
             try {
                 const response = await fetch(`/unitApp/todos/addTask/`, {
                     method: "POST",
@@ -254,10 +256,13 @@
                     },
                     body: JSON.stringify({ title: title }),
                 });
+        
                 if (!response.ok) {
                     console.error("Todoの追加に失敗しました:", response.status);
                 }
+        
                 fetchTodos();
+                titleInput.value = "";
             } catch (error) {
                 console.error("Todoの追加中にエラーが発生しました:", error);
             }
@@ -531,7 +536,7 @@
                             trace.sort = false;
         
                             trace.marker = {
-                                colors: ["red", "green"],
+                                colors: ["#DC4C64", "#14A44D"],
                             };
                         }
                     });
