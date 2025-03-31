@@ -87,6 +87,7 @@
                             </div>
                         </div>
                     </div>
+                    <div id="chart-container"style="height:400px">TODO状況</div>
                 </div>
             </div>
         </div>
@@ -353,28 +354,50 @@
                 });
                 chartUpdate()
             } catch {
-                console.log('error')
+                console.error('error')
             }
         }
         async function chartUpdate() {
-          await fetch('/unitApp/todos/todoChart/')
-          .then(response => response.json())
-          .then(data => {
-              const chartData = data.chart;
-              const chartContainer = document.getElementById('chart-container');
-      
-              if (chartContainer.hasChildNodes()) {
-                  Plotly.react('chart-container', chartData.data, chartData.layout);
-              } else {
-                  Plotly.newPlot('chart-container', chartData.data, chartData.layout);
-              }
-          })
-          .catch(error => {
-              console.error('Error fetching chart data:', error);
-          });
-        }
-    </script>
-    <div id="chart-container"style="height:400px">chart</div>
+            await fetch('/unitApp/todos/todoChart/')
+                .then(response => response.json())
+                .then(data => {
+                    const chartData = data.chart;
+                    const chartContainer = document.getElementById('chart-container');
+        
+                    chartData.data.forEach(trace => {
+                        if (trace.type === "pie") {
+                            const newLabels = ["未完了", "完了"];
+                            const newValues = [0, 0];
+        
+                            trace.labels.forEach((label, index) => {
+                                if (label === "未完了") {
+                                    newValues[0] = trace.values[index];
+                                } else if (label === "完了") {
+                                    newValues[1] = trace.values[index];
+                                }
+                            });
+
+                            trace.labels = newLabels;
+                            trace.values = newValues;
+                            trace.sort = false;
+        
+                            trace.marker = {
+                                colors: ["red", "green"],
+                            };
+                        }
+                    });
+        
+                    if (chartContainer.hasChildNodes()) {
+                        Plotly.react('chart-container', chartData.data, chartData.layout);
+                    } else {
+                        Plotly.newPlot('chart-container', chartData.data, chartData.layout);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching chart data:', error);
+                });
+        }     
+    </script> 
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </body>
 </html>

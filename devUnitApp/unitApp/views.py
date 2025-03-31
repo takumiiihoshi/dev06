@@ -51,13 +51,12 @@ class TodoViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='todoChart')
     def todo_chart(self, request):
         todos = Todo.objects.all()
-        for todo in todos:
-            print(f"Todo: {todo.title}, Completed: {todo.completed}")
+
         completed_count = Todo.objects.filter(completed=True).count()
         not_completed_count = Todo.objects.filter(completed=False).count()
-        print(f"Completed: {completed_count}, Not Completed: {not_completed_count}")
+
         fig = px.pie(
-            names=['completed', 'not completed'],
+            names=['完了', '未完了'],
             values=[completed_count, not_completed_count],
             color_discrete_sequence=['#4CAF50', '#FF9800']
         )
